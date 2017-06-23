@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html" charset="utf-8" />
+<meta name="viewport" content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Rotate Demo</title>
+<style type="text/css">
+html,body,div,img,a{
+    margin:0;
+    padding:0;
+}
+a{
+    text-decoration:none;
+    color:#000;
+    margin:60px auto;
+    display:block;
+    text-align:center;
+    width:240px;
+    height:40px;
+    line-height:40px;
+    border:1px solid #000;
+    border-radius:3px;
+    z-index:100;
+}
+.rotate_wrap{
+    width:90%;
+    max-width:300px;
+    height:300px;
+    margin:10px auto 0;
+    position:relative;
+}
+.bg_img{
+    width:100%;
+    position:absolute;
+    top:0;
+    left:0;
+}
+.arr_img{
+    width:31px;
+    position:absolute;
+    top:72px;
+    left:135px;
+}
+
+.rotate_origin1{
+    transform-origin:50% 50%;<!--设定基点位置-->
+    -ms-transform-origin:50% 50%;
+    -webkit-transform-origin:50% 50%;
+    -moz-transform-origin:50% 50%;
+    -o-transform-origin:50% 50%;
+}
+.rotate_origin2{
+    transform-origin:50% 85%;
+    -ms-transform-origin:50% 85%;
+    -webkit-transform-origin:50% 85%;
+    -moz-transform-origin:50% 85%;
+    -o-transform-origin:50% 85%;
+}
+</style>
+</head>
+
+<body>
+<div class="rotate_wrap">
+    <img class="bg_img rotate_origin1" id="J_bg" src="images/img1.png" />
+    <img class="arr_img rotate_origin2" id="J_arrow" src="images/img2.png" />
+</div>
+<a href="javascript:;" id="J_start">开始</a>
+<script src="http://libs.baidu.com/jquery/1.9.0/jquery.min.js"></script>
+<script type="text/javascript">
+// 转盘样式，a：旋转角度，p：概率（1代表100%），t：需要显示的其它信息（文案or分享）
+
+var result_angle = [{a:0,p:0.1,t:'粉'},{a:45,p:0.1,t:'橙'},{a:90,p:0.1,t:'绿'},{a:135,p:0.3,t:'灰'},{a:180,p:0.1,t:'蓝'},{a:225,p:0.1,t:'黄'},{a:270,p:0.1,t:'红'},{a:315,p:0.1,t:'紫'}];
+
+var rotate = {
+    rotate_angle : 0, //起始位置为0
+    flag_click : true, //转盘转动过程中不可再次触发
+    calculate_result:function(type,during_time){//type:0,箭头转动,1,背景转动;during_time:持续时间(s)
+        var self = this;
+        type = type || 0; // 默认为箭头转动
+        during_time = during_time || 1; // 默认为1s
+        
+        var rand_num = Math.ceil(Math.random() * 100); // 用来判断的随机数，1-100
+        
+        var result_index; // 最终要旋转到哪一块，对应result_angle的下标
+        var start_pos = end_pos = 0; // 判断的角度值起始位置和结束位置
+        
+        for(var i in result_angle){
+            start_pos = end_pos + 1; // 区块的起始值
+            end_pos = end_pos + 100 * result_angle[i].p; // 区块的结束值
+            
+            if(rand_num >= start_pos && rand_num <= end_pos){ // 如果随机数落在当前区块，那么获取到最终要旋转到哪一块
+                result_index = i;
+                break;
+            }
+        }
+        
+        var rand_circle = Math.ceil(Math.random() * 2) + 1; // 附加多转几圈，2-3
+    
+        self.flag_click = false; // 旋转结束前，不允许再次触发
+        if(type == 1){ // 转动盘子
+            self.rotate_angle =  self.rotate_angle - rand_circle * 360 - result_angle[result_index].a - self.rotate_angle % 360;
+            $('#J_bg').css({
+                'transform': 'rotate('+self.rotate_angle+'deg)',
+                '-ms-transform': 'rotate('+self.rotate_angle+'deg)',
+                '-webkit-transform': 'rotate('+self.rotate_angle+'deg)',
+                '-moz-transform': 'rotate('+self.rotate_angle+'deg)',
+                '-o-transform': 'rotate('+self.rotate_angle+'deg)',
+                'transition': 'transform ease-out '+during_time+'s',
+                '-moz-transition': '-moz-transform ease-out '+during_time+'s',
+                '-webkit-transition': '-webkit-transform ease-out '+during_time+'s',
+                '-o-transition': '-o-transform ease-out '+during_time+'s'
+            });
+        }else{ // 转动指针
+            self.rotate_angle = self.rotate_angle + rand_circle * 360 + result_angle[result_index].a - self.rotate_angle % 360;
+            $('#J_arrow').css({
+                'transform': 'rotate('+self.rotate_angle+'deg)',
+                '-ms-transform': 'rotate('+self.rotate_angle+'deg)',
+                '-webkit-transform': 'rotate('+self.rotate_angle+'deg)',
+                '-moz-transform': 'rotate('+self.rotate_angle+'deg)',
+                '-o-transform': 'rotate('+self.rotate_angle+'deg)',
+                'transition': 'transform ease-out '+during_time+'s',
+                '-moz-transition': '-moz-transform ease-out '+during_time+'s',
+                '-webkit-transition': '-webkit-transform ease-out '+during_time+'s',
+                '-o-transition': '-o-transform ease-out '+during_time+'s'
+            });
+        }
+        // 旋转结束后，允许再次触发
+        setTimeout(function(){ 
+            self.flag_click = true;
+        },during_time*1000);
+        // 告诉结果
+        console.log(result_angle[result_index].t);
+    }
+}
+$(document).ready(function(){
+    $('#J_start').click(function(){
+        if(rotate.flag_click){ // 旋转结束前，不允许再次触发
+            rotate.calculate_result(1,1);
+        }
+    });
+});
+</script>
+</body>
+</html>
